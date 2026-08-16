@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String   @db.VarChar(255)
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  settings       UserSettings?
+  tasks          Task[]
+  notifications  Notification[]
+  subscription   Subscription?
+
+  @@map("users")
+}
+
+model Task {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  title           String    @db.VarChar(255)
+  description     String?   @db.Text
+  category        String    @db.VarChar(100)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  isActive        Boolean   @default(true) @map("is_active")
+  reminderEnabled Boolean   @default(false) @map("reminder_enabled")
+  reminderTime    String?   @map("reminder_time") @db.VarChar(8)
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completions  TaskCompletion[]
+  prediction   Prediction?
+  notifications Notification[]
+
+  @@index([userId])
+  @@map("tasks")
+}
+
+model TaskCompletion {
+  id          String   @id @default(uuid()) @db.Uuid
+  taskId      String   @map("task_id") @db.Uuid
+  completedAt DateTime @default(now()) @map("completed_at")
+  notes       String?  @db.Text
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId, completedAt])
+  @@map("task_completions")
+}
+
+model Prediction {
+  id                   String   @id @default(uuid()) @db.Uuid
+  taskId               String   @unique @map("task_id") @db.Uuid
+  averageIntervalDays  Decimal  @map("average_interval_days") @db.Decimal(10, 4)
+  minDays              Int      @map("min_days")
+  bestDay              Int      @map("best_day")
+  maxDays              Int      @map("max_days")
+  confidenceScore      Decimal  @map("confidence_score") @db.Decimal(5, 4)
+  predictedDate        DateTime @map("predicted_date")
+  calculatedAt         DateTime @default(now()) @map("calculated_at")
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("predictions")
+}
+
+model Notification {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @map("user_id") @db.Uuid
+  taskId           String    @map("task_id") @db.Uuid
+  notificationType String    @map("notification_type") @db.VarChar(50)
+  scheduledFor     DateTime  @map("scheduled_for")
+  sentAt           DateTime? @map("sent_at")
+  status           String    @default("pending") @db.VarChar(50)
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([scheduledFor])
+  @@index([taskId])
+  @@map("notifications")
+}
+
+model Subscription {
+  id                    String    @id @default(uuid()) @db.Uuid
+  userId                String    @unique @map("user_id") @db.Uuid
+  revenuecatCustomerId  String    @unique @map("revenuecat_customer_id") @db.VarChar(255)
+  plan                  String    @db.VarChar(50)
+  status                String    @db.VarChar(50)
+  startedAt             DateTime  @map("started_at")
+  expiresAt             DateTime? @map("expires_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model UserSettings {
+  id                       String   @id @default(uuid()) @db.Uuid
+  userId                   String   @unique @map("user_id") @db.Uuid
+  notificationsEnabled     Boolean  @default(true) @map("notifications_enabled")
+  darkMode                 Boolean  @default(false) @map("dark_mode")
+  smartPredictionsEnabled  Boolean  @default(true) @map("smart_predictions_enabled")
+  timezone                 String   @default("UTC") @db.VarChar(100)
+  createdAt                DateTime @default(now()) @map("created_at")
+  updatedAt                DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
