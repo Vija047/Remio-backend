@@ -1,0 +1,51 @@
+service: routine-ai-backend
+frameworkVersion: '4.x'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  memorySize: 512
+  timeout: 29
+  environment:
+    NODE_ENV: ${self:provider.stage}
+    DATABASE_URL: ${env:DATABASE_URL, ''}
+    JWT_SECRET: ${env:JWT_SECRET, ''}
+    JWT_EXPIRES_IN: ${env:JWT_EXPIRES_IN, '7d'}
+    OPENROUTER_API_KEY: ${env:OPENROUTER_API_KEY, ''}
+    OPENROUTER_BASE_URL: ${env:OPENROUTER_BASE_URL, 'https://openrouter.ai/api/v1'}
+    OPENROUTER_MODEL: ${env:OPENROUTER_MODEL, 'openai/gpt-5-chat'}
+
+package:
+  patterns:
+    - '!src/**'
+    - '!test/**'
+    - '!scripts/**'
+    - '!.github/**'
+    - '!*.md'
+    - '!tsconfig*.json'
+    - '!nest-cli.json'
+    - '!eslint.config.mjs'
+    - '!postman/**'
+    - 'dist/**'
+    - 'prisma/**'
+    - 'node_modules/.prisma/**'
+    - 'node_modules/@prisma/client/**'
+
+functions:
+  api:
+    handler: dist/lambda.handler
+    events:
+      - httpApi: '*'
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+      - http:
+          path: /
+          method: ANY
+          cors: true
+
+plugins:
+  - serverless-offline
