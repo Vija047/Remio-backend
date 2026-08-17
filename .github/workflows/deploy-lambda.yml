@@ -37,20 +37,16 @@ jobs:
         run: npm run build
 
       - name: Configure AWS Credentials via OIDC Role
-        if: ${{ env.AWS_KEY == '' }}
+        if: ${{ !secrets.AWS_ACCESS_KEY_ID }}
         uses: aws-actions/configure-aws-credentials@v4
-        env:
-          AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME || 'arn:aws:iam::888577041177:role/routine-ai-github-actions' }}
           role-session-name: RoutineAiGitHubDeploy
           aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
 
       - name: Configure AWS Credentials via Access Keys
-        if: ${{ env.AWS_KEY != '' }}
+        if: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
         uses: aws-actions/configure-aws-credentials@v4
-        env:
-          AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
