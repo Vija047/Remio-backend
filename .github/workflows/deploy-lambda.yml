@@ -36,12 +36,14 @@ jobs:
       - name: Build NestJS Application
         run: npm run build
 
-      - name: Configure AWS Credentials via OIDC Role
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::888577041177:role/routine-ai-github-actions
-          role-session-name: RoutineAiGitHubDeploy
+          role-to-assume: ${{ secrets.AWS_ACCESS_KEY_ID == '' && 'arn:aws:iam::888577041177:role/routine-ai-github-actions' || '' }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION || 'ap-south-1' }}
+          role-session-name: RoutineAiGitHubDeploy
 
       - name: Deploy with Serverless Framework
         env:
