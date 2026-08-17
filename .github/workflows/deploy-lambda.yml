@@ -41,7 +41,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::888577041177:role/routine-ai-github-actions
           role-session-name: RoutineAiGitHubDeploy
-          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+          aws-region: ${{ secrets.AWS_REGION || 'ap-south-1' }}
 
       - name: Deploy with Serverless Framework
         env:
