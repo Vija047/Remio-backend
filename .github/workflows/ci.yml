@@ -26,7 +26,7 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/routine_ai_test
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:admin@localhost:5432/routineai?schema=public' }}
 
       - name: Build NestJS Application
         run: npm run build
