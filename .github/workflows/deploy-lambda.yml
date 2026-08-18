@@ -36,7 +36,7 @@ jobs:
         run: npm run build
 
       - name: Install Serverless CLI Globally
-        run: npm install -g serverless@3
+        run: npm install -g serverless@3 serverless-offline@13
 
       - name: Prune Dev Dependencies for Lightweight Package
         run: npm prune --production --legacy-peer-deps
