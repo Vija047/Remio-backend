@@ -28,10 +28,11 @@ package:
     - '!nest-cli.json'
     - '!eslint.config.mjs'
     - '!postman/**'
+    - '!**/*.map'
+    - '!**/*.tsbuildinfo'
     - 'dist/**'
     - 'prisma/**'
-    - 'node_modules/.prisma/**'
-    - 'node_modules/@prisma/client/**'
+    - 'node_modules/**'
 
 functions:
   api:
