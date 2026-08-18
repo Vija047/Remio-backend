@@ -1,5 +1,5 @@
 service: routine-ai-backend
-frameworkVersion: '4.x'
+frameworkVersion: '3'
 
 provider:
   name: aws
