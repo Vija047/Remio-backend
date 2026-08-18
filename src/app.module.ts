@@ -12,6 +12,8 @@ import { TaskCompletionsModule } from './task-completions/task-completions.modul
 import { TasksModule } from './tasks/tasks.module';
 import { UsersModule } from './users/users.module';
 
+import { AppController } from './app.controller';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -27,5 +29,6 @@ import { UsersModule } from './users/users.module';
     InsightsModule,
     SubscriptionsModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

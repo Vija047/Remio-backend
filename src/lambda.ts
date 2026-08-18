@@ -12,6 +12,31 @@ let cachedServer: Handler;
 
 async function bootstrapServer(): Promise<Handler> {
   const expressApp = express();
+
+  // Handle API Gateway stage prefixes (e.g. /prod) cleanly
+  expressApp.use((req, res, next) => {
+    if (req.url.startsWith('/prod')) {
+      req.url = req.url.replace(/^\/prod/, '') || '/';
+    }
+    next();
+  });
+
+  // Root landing endpoint
+  expressApp.get('/', (req, res) => {
+    res.json({
+      status: 'ok',
+      service: 'Routine AI API (AWS Lambda)',
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+      endpoints: {
+        docs: '/api/docs',
+        health: '/api/health',
+        tasks: '/api/tasks',
+        auth: '/api/auth',
+      },
+    });
+  });
+
   const adapter = new ExpressAdapter(expressApp);
   const app = await NestFactory.create(AppModule, adapter);
 
