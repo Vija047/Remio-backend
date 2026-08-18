@@ -39,4 +39,9 @@ export class CreateTaskDto {
     message: 'reminderTime must be in HH:mm format',
   })
   reminderTime?: string;
+
+  @ApiPropertyOptional({ example: '2026-05-15' })
+  @IsOptional()
+  @IsString()
+  lastCompletedDate?: string;
 }

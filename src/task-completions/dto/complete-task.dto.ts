@@ -7,4 +7,9 @@ export class CompleteTaskDto {
   @IsString()
   @MaxLength(2000)
   notes?: string;
+
+  @ApiPropertyOptional({ example: '2026-05-18T10:00:00.000Z' })
+  @IsOptional()
+  @IsString()
+  completedAt?: string;
 }

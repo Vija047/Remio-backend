@@ -18,12 +18,14 @@ export class TaskCompletionsService {
       throw new NotFoundException('Task not found');
     }
 
+    const completionDate = dto.completedAt ? new Date(dto.completedAt) : new Date();
+
     return this.prisma.$transaction(async (tx) => {
       const completion = await tx.taskCompletion.create({
         data: {
           taskId,
-          notes: dto.notes,
-          completedAt: new Date(),
+          notes: dto.notes?.trim(),
+          completedAt: isNaN(completionDate.getTime()) ? new Date() : completionDate,
         },
       });
 
@@ -69,6 +71,27 @@ export class TaskCompletionsService {
 
     return this.prisma.taskCompletion.findMany({
       where: { taskId },
+      orderBy: { completedAt: 'desc' },
+    });
+  }
+
+  async allHistory(userId: string) {
+    return this.prisma.taskCompletion.findMany({
+      where: {
+        task: {
+          userId,
+        },
+      },
+      include: {
+        task: {
+          select: {
+            id: true,
+            title: true,
+            category: true,
+            prediction: true,
+          },
+        },
+      },
       orderBy: { completedAt: 'desc' },
     });
   }

@@ -25,6 +25,12 @@ export class TaskCompletionsController {
     private readonly taskCompletionsService: TaskCompletionsService,
   ) {}
 
+  @Get('history/all')
+  @ApiOperation({ summary: 'Get all task completions for authenticated user' })
+  allHistory(@CurrentUser() user: AuthUser) {
+    return this.taskCompletionsService.allHistory(user.id);
+  }
+
   @Post(':id/complete')
   @ApiOperation({ summary: 'Mark a task as completed and recalculate prediction' })
   complete(
@@ -36,7 +42,7 @@ export class TaskCompletionsController {
   }
 
   @Get(':id/history')
-  @ApiOperation({ summary: 'Get completion history for a task' })
+  @ApiOperation({ summary: 'Get completion history for a single task' })
   history(
     @CurrentUser() user: AuthUser,
     @Param('id', ParseUUIDPipe) id: string,
