@@ -10,14 +10,21 @@ provider:
   memorySize: 512
   timeout: 29
   environment:
-    NODE_ENV: ${self:provider.stage}
+    NODE_ENV: ${env:NODE_ENV, 'production'}
     DATABASE_URL: ${env:DATABASE_URL, ''}
     JWT_SECRET: ${env:JWT_SECRET, ''}
     JWT_EXPIRES_IN: ${env:JWT_EXPIRES_IN, '7d'}
     OPENROUTER_API_KEY: ${env:OPENROUTER_API_KEY, ''}
     OPENROUTER_BASE_URL: ${env:OPENROUTER_BASE_URL, 'https://openrouter.ai/api/v1'}
-    OPENROUTER_MODEL: ${env:OPENROUTER_MODEL, 'openai/gpt-5-chat'}
+    OPENROUTER_MODEL: ${env:OPENROUTER_MODEL, 'openai/gpt-4o-mini'}
     GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID, ''}
+    STRIPE_SECRET_KEY: ${env:STRIPE_SECRET_KEY, ''}
+    STRIPE_PUBLISHABLE_KEY: ${env:STRIPE_PUBLISHABLE_KEY, ''}
+    STRIPE_WEBHOOK_SECRET: ${env:STRIPE_WEBHOOK_SECRET, ''}
+    STRIPE_PRICE_PRO_MONTHLY: ${env:STRIPE_PRICE_PRO_MONTHLY, ''}
+    STRIPE_PRICE_PRO_YEARLY: ${env:STRIPE_PRICE_PRO_YEARLY, ''}
+    STRIPE_PRICE_PRO_FAMILY_MONTHLY: ${env:STRIPE_PRICE_PRO_FAMILY_MONTHLY, ''}
+    STRIPE_PRICE_PRO_FAMILY_YEARLY: ${env:STRIPE_PRICE_PRO_FAMILY_YEARLY, ''}
 
 package:
   patterns:
