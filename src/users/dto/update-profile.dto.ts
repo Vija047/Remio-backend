@@ -8,4 +8,10 @@ export class UpdateProfileDto {
   @MinLength(1)
   @MaxLength(255)
   name?: string;
+
+  @ApiPropertyOptional({ example: 'https://example.com/avatar.jpg' })
+  @IsOptional()
+  @IsString()
+  avatarUrl?: string;
 }
+

@@ -94,4 +94,17 @@ describe('PredictionEngine', () => {
     const b = engine.calculate(dates);
     expect(a).toEqual(b);
   });
+
+  it('11. ignores duplicate same-day completion and preserves confidence score', () => {
+    const regularDates = [0, 30, 60, 90, 120].map((d) => daysFrom(start, d));
+    const withDuplicate = [...regularDates, new Date(regularDates[4].getTime() + 300000)]; // duplicate 5 mins later
+
+    const resRegular = engine.calculate(regularDates);
+    const resDuplicate = engine.calculate(withDuplicate);
+
+    expect(resDuplicate.confidenceScore).toBeCloseTo(resRegular.confidenceScore, 2);
+    expect(resDuplicate.bestDay).toBe(resRegular.bestDay);
+    expect(resDuplicate.averageIntervalDays).toBe(resRegular.averageIntervalDays);
+  });
 });
+

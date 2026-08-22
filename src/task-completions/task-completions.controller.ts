@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -41,6 +42,24 @@ export class TaskCompletionsController {
     return this.taskCompletionsService.complete(id, user.id, dto);
   }
 
+  @Delete(':id/complete')
+  @ApiOperation({ summary: 'Undo/delete the latest task completion and recalculate prediction' })
+  uncomplete(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.taskCompletionsService.uncomplete(id, user.id);
+  }
+
+  @Post(':id/uncomplete')
+  @ApiOperation({ summary: 'Undo/delete the latest task completion and recalculate prediction (alias)' })
+  uncompletePost(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.taskCompletionsService.uncomplete(id, user.id);
+  }
+
   @Get(':id/history')
   @ApiOperation({ summary: 'Get completion history for a single task' })
   history(
@@ -50,3 +69,4 @@ export class TaskCompletionsController {
     return this.taskCompletionsService.history(id, user.id);
   }
 }
+

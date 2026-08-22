@@ -1,14 +1,18 @@
 import { configure as serverlessExpress } from '@codegenie/serverless-express';
-import { ValidationPipe } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Callback, Context, Handler } from 'aws-lambda';
 import express from 'express';
+import { ConfigService } from '@nestjs/config';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+import { NotificationsService } from './notifications/notifications.service';
 
 let cachedServer: Handler;
+let cachedApp: INestApplication;
 
 async function bootstrapServer(): Promise<Handler> {
   const expressApp = express();
@@ -39,10 +43,31 @@ async function bootstrapServer(): Promise<Handler> {
 
   const adapter = new ExpressAdapter(expressApp);
   const app = await NestFactory.create(AppModule, adapter);
+  const configService = app.get(ConfigService);
 
+  const isProd = configService.get<string>('NODE_ENV') === 'production';
+  const allowedOrigins = [
+    configService.get<string>('FRONTEND_URL'),
+    configService.get<string>('APP_URL'),
+  ].filter((url): url is string => Boolean(url));
+
+  app.use(helmet());
   app.setGlobalPrefix('api');
   app.enableCors({
-    origin: '*',
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (!isProd) return callback(null, true);
+      if (
+        allowedOrigins.length > 0 &&
+        allowedOrigins.some((allowed) => origin.startsWith(allowed))
+      ) {
+        return callback(null, true);
+      }
+      return callback(
+        new Error(`CORS policy does not allow access from origin: ${origin}`),
+        false,
+      );
+    },
     credentials: true,
   });
   app.useGlobalPipes(
@@ -64,6 +89,7 @@ async function bootstrapServer(): Promise<Handler> {
   SwaggerModule.setup('api/docs', app, document);
 
   await app.init();
+  cachedApp = app;
 
   return serverlessExpress({ app: expressApp });
 }
@@ -78,3 +104,20 @@ export const handler: Handler = async (
   }
   return cachedServer(event, context, callback);
 };
+
+export const dispatchHandler: Handler = async () => {
+  if (!cachedServer) {
+    cachedServer = await bootstrapServer();
+  }
+  const notificationsService = cachedApp.get(NotificationsService);
+  const dispatchedCount = await notificationsService.dispatchPending();
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      status: 'ok',
+      dispatchedCount,
+      timestamp: new Date().toISOString(),
+    }),
+  };
+};
+

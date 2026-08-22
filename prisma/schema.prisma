@@ -9,12 +9,17 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
-  name         String   @db.VarChar(255)
-  email        String   @unique @db.VarChar(255)
-  passwordHash String   @map("password_hash") @db.VarChar(255)
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                 String    @id @default(uuid()) @db.Uuid
+  name               String    @db.VarChar(255)
+  email              String    @unique @db.VarChar(255)
+  avatarUrl          String?   @map("avatar_url") @db.Text
+  passwordHash       String    @map("password_hash") @db.VarChar(255)
+  subscriptionStatus String?   @default("free") @map("subscription_status") @db.VarChar(50)
+  subscriptionTier   String?   @default("free") @map("subscription_tier") @db.VarChar(50)
+  currentPeriodEnd   DateTime? @map("current_period_end")
+  stripeCustomerId   String?   @unique @map("stripe_customer_id") @db.VarChar(255)
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
 
   settings       UserSettings?
   tasks          Task[]
@@ -114,6 +119,7 @@ model UserSettings {
   darkMode                 Boolean  @default(false) @map("dark_mode")
   smartPredictionsEnabled  Boolean  @default(true) @map("smart_predictions_enabled")
   timezone                 String   @default("UTC") @db.VarChar(100)
+  pushToken                String?  @map("push_token") @db.VarChar(255)
   createdAt                DateTime @default(now()) @map("created_at")
   updatedAt                DateTime @updatedAt @map("updated_at")
 

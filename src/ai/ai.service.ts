@@ -148,28 +148,36 @@ export class AiService {
     const upcoming = tasks
       .filter(
         (task) =>
-          task.prediction && task.prediction.predictedDate.getTime() >= now.getTime(),
+          task.prediction && task.prediction.predictedDate && task.prediction.predictedDate.getTime() >= now.getTime(),
       )
       .map((task) => ({
         taskId: task.id,
         title: task.title,
-        predictedDate: task.prediction!.predictedDate.toISOString().slice(0, 10),
-        confidenceScore: Number(task.prediction!.confidenceScore),
-        minDays: task.prediction!.minDays,
-        maxDays: task.prediction!.maxDays,
+        predictedDate: task.prediction?.predictedDate
+          ? task.prediction.predictedDate.toISOString().slice(0, 10)
+          : '',
+        confidenceScore: task.prediction?.confidenceScore
+          ? Number(task.prediction.confidenceScore)
+          : 0,
+        minDays: task.prediction?.minDays ?? 0,
+        maxDays: task.prediction?.maxDays ?? 0,
       }))
       .slice(0, 10);
 
     const overdue = tasks
       .filter(
         (task) =>
-          task.prediction && task.prediction.predictedDate.getTime() < now.getTime(),
+          task.prediction && task.prediction.predictedDate && task.prediction.predictedDate.getTime() < now.getTime(),
       )
       .map((task) => ({
         taskId: task.id,
         title: task.title,
-        predictedDate: task.prediction!.predictedDate.toISOString().slice(0, 10),
-        confidenceScore: Number(task.prediction!.confidenceScore),
+        predictedDate: task.prediction?.predictedDate
+          ? task.prediction.predictedDate.toISOString().slice(0, 10)
+          : '',
+        confidenceScore: task.prediction?.confidenceScore
+          ? Number(task.prediction.confidenceScore)
+          : 0,
       }))
       .slice(0, 10);
 
@@ -185,8 +193,12 @@ export class AiService {
       .map((task) => ({
         taskId: task.id,
         title: task.title,
-        averageIntervalDays: Number(task.prediction!.averageIntervalDays),
-        confidenceScore: Number(task.prediction!.confidenceScore),
+        averageIntervalDays: task.prediction?.averageIntervalDays
+          ? Number(task.prediction.averageIntervalDays)
+          : 0,
+        confidenceScore: task.prediction?.confidenceScore
+          ? Number(task.prediction.confidenceScore)
+          : 0,
       }))
       .slice(0, 10);
 

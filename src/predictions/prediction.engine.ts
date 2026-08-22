@@ -16,9 +16,20 @@ export class PredictionEngine {
    * Deterministic prediction from completion timestamps (ascending not required).
    */
   calculate(completionDates: Date[]): PredictionResult {
-    const sorted = [...completionDates].sort(
+    const rawSorted = [...completionDates].sort(
       (a, b) => a.getTime() - b.getTime(),
     );
+
+    // Deduplicate same-day or near-zero intervals (within 0.25 days / 6 hours)
+    const sorted: Date[] = [];
+    for (const d of rawSorted) {
+      if (
+        sorted.length === 0 ||
+        (d.getTime() - sorted[sorted.length - 1].getTime()) / (24 * 60 * 60 * 1000) >= 0.25
+      ) {
+        sorted.push(d);
+      }
+    }
 
     if (sorted.length < 2) {
       return {
@@ -27,7 +38,7 @@ export class PredictionEngine {
         bestDay: 0,
         maxDays: 0,
         confidenceScore: 0,
-        predictedDate: sorted[0] ?? new Date(0),
+        predictedDate: sorted[0] ?? rawSorted[0] ?? new Date(0),
         status: 'learning',
         message:
           'Complete this task a few more times so RoutineAI can learn your routine.',
@@ -35,6 +46,20 @@ export class PredictionEngine {
     }
 
     const intervals = this.computeIntervals(sorted);
+    if (intervals.length === 0) {
+      return {
+        averageIntervalDays: 0,
+        minDays: 0,
+        bestDay: 0,
+        maxDays: 0,
+        confidenceScore: 0,
+        predictedDate: sorted[sorted.length - 1] ?? new Date(0),
+        status: 'learning',
+        message:
+          'Complete this task a few more times so RoutineAI can learn your routine.',
+      };
+    }
+
     const medianInterval = this.median(intervals);
     const recentTrend = this.ewma(intervals);
     const finalInterval = 0.6 * medianInterval + 0.4 * recentTrend;
@@ -63,7 +88,10 @@ export class PredictionEngine {
     const intervals: number[] = [];
     for (let i = 1; i < sorted.length; i += 1) {
       const ms = sorted[i].getTime() - sorted[i - 1].getTime();
-      intervals.push(ms / (24 * 60 * 60 * 1000));
+      const days = ms / (24 * 60 * 60 * 1000);
+      if (days >= 0.25) {
+        intervals.push(days);
+      }
     }
     return intervals;
   }

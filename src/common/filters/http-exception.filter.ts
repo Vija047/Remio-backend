@@ -27,19 +27,24 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
       response.status(status).json({
         statusCode: status,
-        message,
+        message: Array.isArray(message) ? message.join(', ') : message,
+        error: exception.name,
       });
       return;
     }
 
-    this.logger.error(
-      'Unhandled error',
-      exception instanceof Error ? exception.stack : String(exception),
-    );
+    const err = exception as Error;
+    const isProduction = process.env.NODE_ENV === 'production';
+    const logDetails = err?.stack || String(exception);
+
+    this.logger.error(`Unhandled Exception: ${err?.message || String(exception)}`, logDetails);
 
     response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: 'Internal server error',
+      message: isProduction
+        ? 'Internal server error'
+        : err?.message || 'Internal server error',
+      error: 'InternalServerError',
     });
   }
 }

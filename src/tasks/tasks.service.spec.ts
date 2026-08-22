@@ -13,7 +13,24 @@ describe('TasksService ownership', () => {
     },
   };
 
-  const service = new TasksService(prisma as unknown as PrismaService);
+  const scheduler = {
+    schedule: jest.fn().mockResolvedValue({ id: 'n1' }),
+  };
+
+  const predictionsService = {
+    recalculateForTask: jest.fn().mockResolvedValue({ status: 'ready' }),
+  };
+
+  const subscriptionsService = {
+    hasActiveProAccess: jest.fn().mockResolvedValue(true),
+  };
+
+  const service = new TasksService(
+    prisma as unknown as PrismaService,
+    scheduler as any,
+    predictionsService as any,
+    subscriptionsService as any,
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -36,6 +53,7 @@ describe('TasksService ownership', () => {
 
   it('creates a task for the authenticated user', async () => {
     prisma.task.create.mockResolvedValue({ id: 't1' });
+    prisma.task.findFirst.mockResolvedValue({ id: 't1', title: 'Filter', userId: 'user-1' });
     await service.create('user-1', {
       title: 'Filter',
       category: 'home',

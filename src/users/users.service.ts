@@ -18,6 +18,11 @@ export class UsersService {
         id: true,
         name: true,
         email: true,
+        avatarUrl: true,
+        subscriptionStatus: true,
+        subscriptionTier: true,
+        currentPeriodEnd: true,
+        stripeCustomerId: true,
         createdAt: true,
         updatedAt: true,
         settings: true,
@@ -30,12 +35,16 @@ export class UsersService {
     name: string;
     email: string;
     passwordHash: string;
+    avatarUrl?: string;
   }) {
     return this.prisma.user.create({
       data: {
         name: data.name,
         email: data.email,
         passwordHash: data.passwordHash,
+        avatarUrl: data.avatarUrl,
+        subscriptionStatus: 'free',
+        subscriptionTier: 'free',
         settings: {
           create: {},
         },
@@ -44,6 +53,11 @@ export class UsersService {
         id: true,
         name: true,
         email: true,
+        avatarUrl: true,
+        subscriptionStatus: true,
+        subscriptionTier: true,
+        currentPeriodEnd: true,
+        stripeCustomerId: true,
         createdAt: true,
         updatedAt: true,
         settings: true,
@@ -60,12 +74,18 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id: userId },
       data: {
-        ...(data.name ? { name: data.name.trim() } : {}),
+        ...(data.name !== undefined ? { name: data.name.trim() } : {}),
+        ...(data.avatarUrl !== undefined ? { avatarUrl: data.avatarUrl } : {}),
       },
       select: {
         id: true,
         name: true,
         email: true,
+        avatarUrl: true,
+        subscriptionStatus: true,
+        subscriptionTier: true,
+        currentPeriodEnd: true,
+        stripeCustomerId: true,
         createdAt: true,
         updatedAt: true,
         settings: true,

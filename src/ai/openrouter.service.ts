@@ -14,13 +14,13 @@ export class OpenRouterService {
   constructor(private readonly configService: ConfigService) {}
 
   async chatCompletion(messages: ChatMessage[]): Promise<string> {
-    const apiKey = this.configService.get<string>('OPENROUTER_API_KEY');
+    const apiKey = this.configService.getOrThrow<string>('OPENROUTER_API_KEY');
     const baseUrl =
       this.configService.get<string>('OPENROUTER_BASE_URL') ??
       'https://openrouter.ai/api/v1';
     const model =
       this.configService.get<string>('OPENROUTER_MODEL') ??
-      'openai/gpt-5-chat';
+      'openai/gpt-4o-mini';
 
     if (!apiKey) {
       throw new ServiceUnavailableException(

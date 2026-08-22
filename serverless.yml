@@ -1,5 +1,6 @@
 service: routine-ai-backend
 frameworkVersion: '3'
+useDotenv: true
 
 provider:
   name: aws
@@ -48,5 +49,11 @@ functions:
           method: ANY
           cors: true
 
+  dispatchNotifications:
+    handler: dist/lambda.dispatchHandler
+    events:
+      - schedule: rate(1 minute)
+
 plugins:
   - serverless-offline
+
